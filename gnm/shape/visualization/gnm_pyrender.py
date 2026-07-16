@@ -30,6 +30,8 @@ import trimesh
 if sys.platform.startswith('linux'):
   os.environ.setdefault('PYOPENGL_PLATFORM', 'osmesa')
 import pyrender  # pylint: disable=wrong-import-position
+# Not re-exported by pyrender's __init__ in all versions/platforms.
+import pyrender.shader_program  # pylint: disable=wrong-import-position
 
 # Light direction for shading, in camera-space.
 
