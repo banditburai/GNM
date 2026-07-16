@@ -20,8 +20,14 @@ a right-handed coordinate system in *world-space* with the X-axis pointing
 right, the Y-axis pointing up and the Z-axis pointing towards the viewer.
 """
 
+from __future__ import annotations
+
+import typing
+
 import numpy as np
-import tensorflow as tf
+
+if typing.TYPE_CHECKING:
+  import tensorflow as tf  # pylint: disable=g-import-not-at-top
 
 # Rotate OpenCV's camera coordinate system 180 degrees around the X-axis to
 # align it with the OpenGL coordinate frame.
@@ -213,6 +219,8 @@ def opencv_extrinsics_to_opengl_tf(extrinsics: tf.Tensor) -> tf.Tensor:
   Returns:
     Camera extrinsics in OpenGL coordinate system, with the same shape as input.
   """
+  import tensorflow as tf  # pylint: disable=g-import-not-at-top
+
   return tf.einsum(
       'mk,...kn->...mn',
       tf.convert_to_tensor(OPENCV_TO_OPENGL, dtype=tf.float32),
@@ -240,6 +248,8 @@ def opencv_intrinsics_matrix_to_opengl_view_matrix_tf(
     A projection matrix, with shape (A1, ..., An, 4, 4), that follows the
       OpenGL convention.
   """
+  import tensorflow as tf  # pylint: disable=g-import-not-at-top
+
   fx = camera_to_image[..., 0, 0]
   fy = camera_to_image[..., 1, 1]
   focal_length = tf.stack([fx, fy], axis=-1)
@@ -284,6 +294,8 @@ def opencv_intrinsics_to_opengl_view_matrix_tf(
     A projection matrix, with shape (A1, ..., An, 4, 4), that follows the
       OpenGL convention.
   """
+  import tensorflow as tf  # pylint: disable=g-import-not-at-top
+
   fx, fy = focal_length[..., :1], focal_length[..., 1:]
   cx, cy = principal_point[..., :1], principal_point[..., 1:]
 
