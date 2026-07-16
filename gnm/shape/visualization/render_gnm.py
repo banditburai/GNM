@@ -32,7 +32,12 @@ FloatArray = npt.NDArray[np.floating]
 ColorOrImage = npt.NDArray[np.uint8] | FloatArray | Sequence[float] | float
 
 _pkg = __package__ or 'gnm.shape.visualization'
-_TEXTURES_DIR = epath.resource_path(_pkg).parent / 'data' / 'textures'
+try:
+  _TEXTURES_DIR = epath.resource_path(_pkg).parent / 'data' / 'textures'
+except AttributeError:
+  # Editable installs may yield a MultiplexedPath without `.parent`; fall back
+  # to the on-disk location of this file.
+  _TEXTURES_DIR = epath.Path(__file__).parent.parent / 'data' / 'textures'
 _EDGEFLOW_TEXTURE_BY_BODY_PART = immutabledict.immutabledict({
     gnm_numpy.GNMBodyPart.HEAD: str(_TEXTURES_DIR / 'edgeflow_bw_4k.png'),
 })

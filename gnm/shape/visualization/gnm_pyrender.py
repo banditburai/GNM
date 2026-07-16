@@ -16,6 +16,7 @@
 
 import functools
 import os
+import sys
 import tempfile
 from typing import Any
 import cv2
@@ -23,7 +24,11 @@ import numpy as np
 import tqdm
 import trimesh
 
-os.environ['PYOPENGL_PLATFORM'] = 'osmesa'
+# Default to OSMesa for headless rendering on Linux, but respect an existing
+# PYOPENGL_PLATFORM (e.g. 'egl' on GPU boxes) and leave macOS/Windows on their
+# native GL contexts.
+if sys.platform.startswith('linux'):
+  os.environ.setdefault('PYOPENGL_PLATFORM', 'osmesa')
 import pyrender  # pylint: disable=wrong-import-position
 
 # Light direction for shading, in camera-space.
@@ -258,7 +263,16 @@ def render(
 @functools.cache
 def _custom_fragment_file(fragment_shader: str) -> str:
   """Returns a custom fragment shader file with modified diffuse lighting."""
-  filepath = pyrender.shader_program.get_shader_path(fragment_shader)
+  if hasattr(pyrender.shader_program, 'get_shader_path'):
+    filepath = pyrender.shader_program.get_shader_path(fragment_shader)
+  else:
+    # PyPI pyrender (<=0.1.45) has no get_shader_path; shaders live in the
+    # package's shaders/ directory.
+    filepath = os.path.join(
+        os.path.dirname(pyrender.shader_program.__file__),
+        'shaders',
+        os.path.basename(fragment_shader),
+    )
   with open(filepath, 'r', encoding='utf-8') as f:
     mesh_frag_shader = f.readlines()
 
